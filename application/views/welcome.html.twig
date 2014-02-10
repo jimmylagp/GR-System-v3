@@ -1,0 +1,74 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+
+<div class="row">
+	<div class="large-8 columns">
+		
+		<div class="row">
+			<div class="large-4 columns">
+				<div class="panel text-center">
+					<a href="#" title="Crear pedido"><span class="fi-page-edit buttons"></span></a>
+				</div>
+			</div>
+			<div class="large-4 columns">
+				<div class="panel text-center">
+					<a href="/index.php/productos" title="Lista de productos"><span class="fi-list-thumbnails buttons"></span></a>
+				</div>
+			</div>
+			<div class="large-4 columns">
+				<div class="panel text-center">
+					<a href="#" title="Lista de rutas"><span class="fi-map buttons"></span></a>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-4 columns">
+				<div class="panel text-center">
+					<a href="#" title="Lista de clientes"><span class="fi-address-book buttons"></span></a>
+				</div>
+			</div>
+			<div class="large-4 columns">
+				<div class="panel text-center">
+					<a href="#" title="Lista de abonos"><span class="fi-dollar buttons"></span></a>
+				</div>
+			</div>
+			<div class="large-4 columns">
+				<div class="panel text-center">
+					<a href="#" title="Lista de pedidos"><span class="fi-page-search buttons"></span></a>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<div class="large-4 columns">
+		<div class="panel">
+
+			{% if sesion.id %}
+			<h6>Bienvenido</h6>
+			<h4>{{ sesion.nombre }}</h4>
+			<a href="/index.php/welcome/logout" title="Salir">Salir</a>
+			{% else %}
+			<h3>Iniciar sesión:</h3>
+			{% if status %}
+			<div data-alert class="alert-box warning">
+				Error al iniciar sesión.
+				<a href="#" class="close">&times;</a>
+			</div>
+			{% endif %}
+
+			<form action="" method="post">
+				<label>Usuario:
+					<input name="user" type="text" placeholder="Tu nombre de usuario..." required />
+				</label>
+				<label>Contraseña:
+					<input name="pass" type="password" placeholder="Tu contraseña..." required />
+				</label>
+				<input type="submit" value="Entrar" class="button small" />
+			</form>
+			{% endif %}
+		</div>
+	</div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,47 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GR System v3</title>
+    <link rel="stylesheet" href="/assets/css/foundation.css" />
+    <link rel="stylesheet" href="/assets/icons/foundation-icons.css">
+    <link rel="stylesheet" href="/assets/css/app.css">
+    <script src="/assets/js/vendor/modernizr.js"></script>
+  </head>
+  <body>
+
+    <div class="row">
+      <div class="large-5 columns">
+        <h1>GR Bicirefacciones</h1>
+      </div>
+      <div class="large-7 columns">
+        <br>
+        <ul class="inline-list">
+          <li><a href="/">Inicio</a></li>
+          <li><a href="/index.php/productos/lista">Lista de productos</a></li>
+          <li><a href="#">Pedidos</a></li>
+          <li><a href="#">Abonos</a></li>
+          {% if sesion.id %}
+          <li><a href="/index.php/welcome/logout" title="Salir">Salir</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="large-12 columns">
+        <hr>
+      </div>
+    </div>
+    
+    {% block body %}{% endblock %}
+    
+    <script src="/assets/js/vendor/jquery.js"></script>
+    <script src="/assets/js/foundation.min.js"></script>
+    <script src="/assets/js/app.js"></script>
+    <script>
+      $(document).foundation();
+    </script>
+  </body>
+</html>

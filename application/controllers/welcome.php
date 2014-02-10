@@ -2,26 +2,40 @@
 
 class Welcome extends CI_Controller {
 
-	/**
-	 * Index Page for this controller.
-	 *
-	 * Maps to the following URL
-	 * 		http://example.com/index.php/welcome
-	 *	- or -  
-	 * 		http://example.com/index.php/welcome/index
-	 *	- or -
-	 * Since this controller is set as the default controller in 
-	 * config/routes.php, it's displayed at http://example.com/
-	 *
-	 * So any other public methods not prefixed with an underscore will
-	 * map to /index.php/welcome/<method_name>
-	 * @see http://codeigniter.com/user_guide/general/urls.html
-	 */
+	function __construct()
+	{
+		parent::__construct();
+
+		$this->load->model('usuarios_model', 'usuarios');
+	}
+
 	public function index()
 	{
-		$this->load->view('welcome_message');
+		$status = $this->loggin($this->input->post('user'), $this->input->post('pass'));
+
+		$data = array(
+			'sesion' => $this->session->all_userdata(),
+			'status' => $status
+		);
+
+		$this->twig->display('welcome.html.twig', $data);
+	}
+
+	private function loggin($user, $pass){
+		
+		if( !empty($user) && !empty($pass)){
+			$usuario = $this->usuarios->get_usuario($user, $pass);
+			if(!empty($usuario)){
+				$this->session->set_userdata(get_object_vars($usuario));
+				return false;
+			}else{
+				return true;
+			}
+		}
+	}
+
+	public function logout(){
+		$this->session->sess_destroy();
+		redirect('/');
 	}
 }
-
-/* End of file welcome.php */
-/* Location: ./application/controllers/welcome.php */
