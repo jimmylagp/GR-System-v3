@@ -3,16 +3,90 @@
 {% block body %}
 
 <div class="row">
+	<div class="large-12 columns">
+		<h3>Administrar productos</h3>
+	</div>
+</div>
+<div class="row">
 	<div class="large-8 columns">
 		
-		
+		<table id="aproducts">
+			<thead>
+				<tr>
+					<th width="10%">Cantidad</th>
+					<th width="75%">Nombre</th>
+					<th width="5%">Precio</th>
+					<th width="10%"></th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for val in productos %}
+				<tr data-id="{{ val.id }}">
+					<td><blockquote><span class="amount" contenteditable="true">{{ val.cantidad }}</span></blockquote></td>
+					<td><blockquote><span class="name" contenteditable="true">{{ val.nombre }}</span></blockquote></td>
+					<td><blockquote>$<span class="price" contenteditable="true">{{ val.precio|number_format(2, '.', ',') }}</span></blockquote></td>
+					<td><span class="fi-x button postfix"></span></td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
 
+		<ul class="pagination">
+			{% autoescape false %}
+			{{ pagination }}
+			{% endautoescape %}
+		</ul>  
 	</div>
 	<div class="large-4 columns">
-		<div class="panel">
+		<div id="search" class="panel">
 
+			<ul class="button-group">
+				<li><a href="#" class="tiny button type" data-s="bici:">Bicicleta</a></li>
+				<li><a href="#" class="tiny button type" data-s="moto:">Motocicleta</a></li>
+				<li><a href="#" class="tiny button type" data-s="todo:">Todos</a></li>
+			</ul>
+
+			<form action="/index.php/productos/" method="post">
+				<div class="row collapse">
+					<div class="small-10 columns">
+						<input name="search" type="search" placeholder="Buscar un producto..." autocomplete="off">
+					</div>
+					<div class="small-2 columns">
+						<button type="submit" class="button postfix"><span class="fi-magnifying-glass"></span></button>
+					</div>
+				</div>
+				
+			</form>
 			
-			
+		</div>
+		<div id="add-product" class="panel">
+			<h5>Agrear un nuevo producto:</h5>
+			{% if status == 0 %}
+			<div data-alert class="alert-box success">
+				Se agrego el producto.
+				<a href="#" class="close">&times;</a>
+			</div>
+			{% endif %}
+			<form action="/index.php/productos/" method="post">
+				<div class="row">
+					<div class="large-12 columns">
+						<input type="radio" name="typep" required><label>Bicicicleta:</label>
+						<input type="radio" name="typep" required><label>Motocicleta:</label>
+						<input type="text" name="namep" placeholder="Nombre del producto..." required>
+					</div>
+					<div class="large-6 columns">
+						<input type="number" step="any" name="pricep" placeholder="$0.00" required>
+					</div>
+					<div class="large-6 columns">
+						<input type="number" name="amountp" placeholder="Cantidad..." required>
+					</div>
+				</div>
+				<div class="row">
+					<div class="large-12 columns">
+						<input type="submit" value="Agregar" class="button postfix">
+					</div>
+				</div>
+			</form>
 		</div>
 	</div>
 </div>
