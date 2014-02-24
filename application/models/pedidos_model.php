@@ -7,9 +7,9 @@ class Pedidos_model extends CI_Model {
 		parent::__construct();
 	}
 
-	function get_pedidos_por_cliente($id)
+	function get_pedidos_por_cliente($id_cliente)
 	{
-		$query = $this->db->get_where('pedidos', array('id_clientes' => $id));
+		$query = $this->db->get_where('pedidos', array('id_cliente' => $id_cliente));
 		return $query->result();
 	}
 
@@ -20,9 +20,13 @@ class Pedidos_model extends CI_Model {
 
 	function update_pedido($data, $id_pedido)
 	{
-		$this->db->update('pedidos', $data, array('id' => $id_pedidos));
+		$this->db->update('pedidos', $data, array('id' => $id_pedido));
 	}
 
+	function dlete_pedido()
+	{
+		$this->db->delete('pedidos', array('id' => $id_pedido));
+	}
 }
 
 ?>

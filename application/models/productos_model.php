@@ -52,9 +52,13 @@ class Productos_model extends CI_Model {
 		$this->db->insert('productos', $data);
 	}
 
-	function update_pedido($data, $id_producto)
+	function update_producto($data, $id_producto)
 	{
 		$this->db->update('productos', $data, array('id' => $id_producto));
+	}
+
+	function delete_producto($id_producto){
+		$this->db->delete('productos', array('id' => $id_producto));
 	}
 
 }

@@ -1,0 +1,73 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+
+<div class="row">
+	<div class="large-12 columns">
+		<h3>Crear un pedido</h3>
+	</div>
+</div>
+<div class="row">
+	<div class="large-8 columns">
+		
+		{% if status_pedido %}
+		<div class="panel">
+			<div class="row">
+				<div class="large-4 columns">
+					<select name="ruta" id="rutap">
+						<option>Seleccione una ruta</option>
+						{% for val in rutas %}
+						<option value="{{ val.id }}">{{ val.nombre }}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="large-6 columns">
+					<select name="cliente" id="clientep">
+						<option>Seleccione un cliente</option>
+					</select>
+				</div>
+				<div class="large-2 columns">
+					<button id="crear-pedido" class="button postfix fi-page-add"> Crear</button>
+				</div>
+			</div>
+		</div>
+		{% else %}
+		<div class="panel">
+			<h5>Pedido para {{ cliente }}</h5>
+		</div>
+		<table>
+			<thead>
+				<tr>
+					<th width="10%">Cantidad</th>
+					<th width="75%">Nombre</th>
+					<th width="15%">Precio</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for val in productos %}
+				<tr>
+					<td>{{ val.cantidad }}</td>
+					<td>{{ val.nombre }}</td>
+					<td>${{ val.precio|number_format(2, '.', ',') }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+		<ul class="pagination">
+			{% autoescape false %}
+			{{ pagination }}
+			{% endautoescape %}
+		</ul>
+	{% endif %}
+	</div>
+	<div class="large-4 columns">
+		<div id="search" class="panel">
+
+			
+			
+		</div>
+	</div>
+</div>
+
+{% endblock %}

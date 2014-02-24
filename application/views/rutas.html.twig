@@ -1,0 +1,61 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+
+<div class="row">
+	<div class="large-12 columns">
+		<h3>Administrar rutas</h3>
+	</div>
+</div>
+<div class="row">
+	<div class="large-8 columns">
+	{% if logged %}
+		<table id="arutas">
+			<thead>
+				<tr>
+					<th width="80%">Nombre</th>
+					<th width="10%">Clientes</th>
+					<th width="10%"></th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for val in rutas %}
+				<tr data-id="{{ val.id }}">
+					<td><span class="name" contenteditable="true">{{ val.nombre }}</span></td>
+					<td>{{ val.clientes }}</td>
+					<td><span class="delete fi-x button postfix" data-id="{{ val.id }}"></span></td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<div class="panel">
+			<h2>Esta sección es solo para el Administrador.</h2>
+		</div>
+	{% endif %} 
+	</div>
+	<div class="large-4 columns">
+		<div id="search" class="panel">
+			<h4>Agregar una ruta:</h4>
+			{% if status == 0 %}
+			<div data-alert class="alert-box success">
+				Se agrego la ruta.
+				<a href="#" class="close">&times;</a>
+			</div>
+			{% endif %}
+			<form action="" method="post">
+				<div class="row collapse">
+					<div class="large-10 columns">
+						<input type="text" name="namer" placeholder="Nombre de la ruta..." required>
+					</div>
+					<div class="large-2 columns">
+						<button type="submit" class="button postfix"><span class="fi-plus"></span></button>
+					</div>
+				</div>
+			</form>
+			
+		</div>
+	</div>
+</div>
+
+{% endblock %}

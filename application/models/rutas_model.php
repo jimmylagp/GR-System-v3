@@ -9,7 +9,13 @@ class Rutas_model extends CI_Model {
 
 	function get_rutas()
 	{
-		$query = $this->db->get('rutas');
+		$query = $this->db->get_where('rutas');
+		return $query->result();
+	}
+
+	function get_rutas_por_id($id_ruta)
+	{
+		$query = $this->db->get_where('rutas', array('id' => $id_ruta));
 		return $query->result();
 	}
 
@@ -21,6 +27,10 @@ class Rutas_model extends CI_Model {
 	function update_ruta($data, $id_ruta)
 	{
 		$this->db->update('rutas', $data, array('id' => $id_ruta));
+	}
+
+	function delete_ruta($id_ruta){
+		$this->db->delete('rutas', array('id' => $id_ruta));
 	}
 
 }
