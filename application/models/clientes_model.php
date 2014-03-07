@@ -7,6 +7,11 @@ class Clientes_model extends CI_Model {
 		parent::__construct();
 	}
 
+	function get_cliente_por_id($id_cliente){
+		$query = $this->db->get_where('clientes', array('id' => $id_cliente));
+		return $query->result();
+	}
+
 	function get_clientes_por_ruta($id_ruta)
 	{
 		$query = $this->db->get_where('clientes', array('id_ruta' => $id_ruta));

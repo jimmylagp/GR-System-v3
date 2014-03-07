@@ -198,5 +198,52 @@ $(document).ready(function(){
 			}
 		);
 	});
+
+	$('#list-to-add button').click(function(){
+		$(this).hide();
+		$(this).next().show();
+		$(this).next().focus();
+	});
+
+	$('#list-to-add input').keydown(function(e){
+		if (e.keyCode == 13) {
+			$.post(
+				"/index.php/pedidos/add",
+				{
+					id_prod: $(this).closest('tr').attr('data-id'),
+					cant: $(this).val()
+				},
+				function(result){
+					var obj = JSON.parse(result);
+					if(obj['error'] == 0)
+					{
+						$('#list-to-add input').attr('disabled', 'disabled');
+						get_total_pedido();
+					}
+					else
+					{
+						alert("Ocurrio un error al agregar el producto al pedido.");
+					}
+				}
+			);
+		}
+	});
+
+	(function($){
+		get_total_pedido();
+	})(jQuery);
+
+	function get_total_pedido(){
+		$.get( "/index.php/pedidos/gettotal", function(data){
+			var obj = JSON.parse(data);
+			$('#psubtotal').html('$'+numeral(obj['total']).format('0,0.00'));
+
+			var total = parseFloat(obj['total']),
+				descuento = parseFloat($('#pdescuento').html());
+			total = total - ((descuento/100)*total);
+
+			$('#ptotal').html('$'+numeral(total).format('0,0.00'));
+		});
+	}
 /*----------------------*/
 });
