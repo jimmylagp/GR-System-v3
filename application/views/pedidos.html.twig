@@ -4,55 +4,76 @@
 
 <div class="row">
 	<div class="large-12 columns">
-		<h3>Lista de productos</h3>
+		<h3>Lista de pedidos</h3>
 	</div>
 </div>
 <div class="row">
 	<div class="large-8 columns">
-		
-		<table>
-			<thead>
-				<tr>
-					<th width="10%">Cantidad</th>
-					<th width="75%">Nombre</th>
-					<th width="15%">Precio</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for val in productos %}
-				<tr>
-					<td>{{ val.cantidad }}</td>
-					<td>{{ val.nombre }}</td>
-					<td>${{ val.precio|number_format(2, '.', ',') }}</td>
-				</tr>
-				{% endfor %}
-			</tbody>
-		</table>
+		{% if logged %}
+			{% if pedidos %}
+			<div class="panel">
+				<h5>Pedidos de <u>{{ cliente }}</u></h5>
+			</div>
+			<table id="lista-pedidos" width="100%">
+				<thead>
+					<tr>
+						<th width="15%">Folio</th>
+						<th width="55%">Fecha</th>
+						<th width="20%">Total</th>
+						<th width="10%"></th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for val in pedidos %}
+					<tr data-id="{{ val.id }}">
+						<td>{{ val.folio }}</td>
+						<td>
+							<a href="/index.php/pedidos/editar/{{ val.id }}/{{ id_cliente }}" title="Editar un pedido">{{ val.fecha }}</a>
+						</td>
+						<td>${{ val.total|number_format(2, '.', ',') }}</td>
+						<td>
+							<button class="delete button tiny fi-trash"></button>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			{% else %}
 
-		<ul class="pagination">
-			{% autoescape false %}
-			{{ pagination }}
-			{% endautoescape %}
-		</ul>  
+			<div class="panel">
+				<h5>Aún no eliges un cliente.</h5>
+			</div>
+
+			{% endif %}
+
+		{% else %}
+
+		<div class="panel">
+			<h2>Esta sección es solo para el Administrador.</h2>
+		</div>
+
+		{% endif %}
 	</div>
 	<div class="large-4 columns">
-		<div id="search" class="panel">
+		<div id="clientes" class="panel">
 
-			<ul class="button-group">
-				<li><a href="#" class="tiny button type" data-s="bici:">Bicicleta</a></li>
-				<li><a href="#" class="tiny button type" data-s="moto:">Motocicleta</a></li>
-				<li><a href="#" class="tiny button type" data-s="todo:">Todos</a></li>
-			</ul>
+			<h5>Elija un cliente:</h5>
+			<hr>
 
-			<form action="/index.php/productos/lista/" method="post">
-				<div class="row collapse">
-					<div class="small-10 columns">
-						<input name="search" type="search" placeholder="Buscar un producto..." autocomplete="off">
-					</div>
-					<div class="small-2 columns">
-						<button type="submit" class="button postfix"><span class="fi-magnifying-glass"></span></button>
-					</div>
-				</div>
+			<form action="" method="post">
+				
+				<select name="rutap" id="rutap" required="required">
+					<option value="">Seleccione una ruta</option>
+					{% for val in rutas %}
+					<option value="{{ val.id }}">{{ val.nombre }}</option>
+					{% endfor %}
+				</select>
+
+				<select name="clientep" id="clientep" required="required">
+					<option value="">Seleccione un cliente</option>
+				</select>
+
+				<button type="submit" id="ver-pedidos" class="button tiny fi-eye"> Ver Pedidos</button>
 				
 			</form>
 			

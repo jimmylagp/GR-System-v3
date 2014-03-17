@@ -19,9 +19,32 @@ class Pedidos extends CI_Controller {
 	{
 		$logged = $this->session->userdata('id') ? true : false;
 
-		$data = array(
-			'logged' => $logged
-		);
+		$data = array();
+
+		if($this->input->post('clientep'))
+		{
+			$pedidos = $this->pedidos->get_pedidos_por_cliente($this->input->post('clientep'));
+
+			$lpedidos = array();
+			foreach ($pedidos as $key => $value) {
+				$total = $this->pedidos->total_pedido($value->id);
+				$lpedidos[] = array(
+					'id' 	=> $value->id,
+					'folio' => $this->folio($value->id),
+					'fecha' => $value->fecha,
+					'total' => $total[0]->total - (($value->descuento/100) * $total[0]->total)
+				);
+			}
+
+			$data['pedidos'] = $lpedidos;
+
+			$cliente = $this->clientes->get_cliente_por_id($this->input->post('clientep'));
+			$data['cliente'] = $cliente[0]->nombre;
+			$data['id_cliente'] = $this->input->post('clientep');
+		}
+
+		$data['logged'] = $logged;
+		$data['rutas'] = $this->rutas->get_rutas();
 
 		$this->twig->display('pedidos.html.twig', $data);
 	}
@@ -57,7 +80,10 @@ class Pedidos extends CI_Controller {
 			$page = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;
 
 			$result = $this->search_products($this->input->post('search'), $page);
+			$descuento = $this->pedidos->get_descuento_por_id($sesion_pedido['id_pedido']);
+
 			$data['productos'] = $result['list'];
+			$data['descuento'] = $descuento[0]->descuento;
 			$data['pd_agregados'] = $this->pd_agregados->get_pdAgregados_por_pedido($sesion_pedido['id_pedido']);
 
 			$config = array(
@@ -92,6 +118,76 @@ class Pedidos extends CI_Controller {
 		$this->twig->display('crear_pedidos.html.twig', $data);
 	}
 
+	public function ver()
+	{
+
+		if(!$this->session->userdata('pedido')) redirect('/pedidos/crear/', 'refresh');
+
+		$logged = $this->session->userdata('id') ? true : false;
+		$sesion_pedido = $this->session->userdata('pedido');
+
+		$data = array();
+
+		$data['logged'] = $logged;
+		$data['list'] = $this->pedidos->get_verpedido_por_id($sesion_pedido['id_pedido']);
+
+		$cliente = $this->clientes->get_cliente_por_id($sesion_pedido['id_cliente']);
+		$data['cliente'] = $cliente[0]->nombre;
+
+		$descuento = $this->pedidos->get_descuento_por_id($sesion_pedido['id_pedido']);
+		$data['descuento'] = $descuento[0]->descuento;
+
+		$this->twig->display('ver_pedido.html.twig', $data);
+	}
+
+	public function editar($id_pedido, $id_cliente)
+	{
+		if($id_pedido && $id_cliente)
+		{
+			$sesion_pedido['id_pedido'] = $id_pedido;
+			$sesion_pedido['id_cliente'] = $id_cliente;
+
+			$this->session->set_userdata('pedido', $sesion_pedido);
+
+			redirect('/pedidos/crear');
+		}
+	}
+
+	public function guardar()
+	{
+		$this->session->unset_userdata('pedido');
+		redirect('/');
+	}
+
+	public function imprimir()
+	{
+		if(!$this->session->userdata('pedido')) redirect('/pedidos/crear/', 'refresh');
+
+		$logged = $this->session->userdata('id') ? true : false;
+		$sesion_pedido = $this->session->userdata('pedido');
+
+		$data = array();
+
+		$data['logged'] = $logged;
+
+		$data['folio'] = 
+		$data['list'] = $this->pedidos->get_verpedido_por_id($sesion_pedido['id_pedido']);
+
+		$cliente = $this->clientes->get_cliente_por_id($sesion_pedido['id_cliente']);
+		$fecha = $this->pedidos->get_fecha_pedido_por_id($sesion_pedido['id_cliente']);
+		$data['fecha'] = $fecha[0]->fecha;
+		$data['nombre'] = $cliente[0]->nombre;
+		$data['lugar'] = $cliente[0]->lugar;
+
+		$descuento = $this->pedidos->get_descuento_por_id($sesion_pedido['id_pedido']);
+		$data['descuento'] = $descuento[0]->descuento;
+
+		$html = $this->load->view('imprimir_pedido', $data, true);
+
+		$this->create_pdf($html);
+	}
+
+	/*Funciones para transacción de datos con Ajax*/
 	public function add()
 	{
 		if($this->input->post('id_prod') && $this->input->post('cant')){
@@ -103,6 +199,30 @@ class Pedidos extends CI_Controller {
 				'id_pedido' => $session['id_pedido']
 			);
 			$this->pd_agregados->insert_pdAgregado($data);
+
+			print_r(json_encode(array("error" => 0)));
+		}else{
+			print_r(json_encode(array("error" => 1)));
+		}
+	}
+
+	public function delete()
+	{
+		if($this->input->post('id_pedido')){
+			
+			$this->pedidos->delete_pedido($this->input->post('id_pedido'));
+
+			print_r(json_encode(array("error" => 0)));
+		}else{
+			print_r(json_encode(array("error" => 1)));
+		}
+	}
+
+	public function deletepa()
+	{
+		if($this->input->post('id_pa')){
+
+			$this->pd_agregados->delete_pdAgregado($this->input->post('id_pa'));
 
 			print_r(json_encode(array("error" => 0)));
 		}else{
@@ -123,6 +243,55 @@ class Pedidos extends CI_Controller {
 		}
 	}
 
+	public function updatedescuento()
+	{
+		if($this->input->post('descuento') >= 0){
+			$session = $this->session->userdata('pedido');
+
+			$data = array(
+				'descuento' => $this->input->post('descuento')
+			);
+			$this->pedidos->update_pedido($data, $session['id_pedido']);
+
+			print_r(json_encode(array("error" => 0)));
+		}else{
+			print_r(json_encode(array("error" => 1)));
+		}
+	}
+
+	public function updateproducto()
+	{
+		if($this->input->post('id_producto') && $this->input->post('cantidad')){
+			$session = $this->session->userdata('pedido');
+
+			$data = array(
+				'cantidad' => $this->input->post('cantidad')
+			);
+			$this->productos->update_producto($data, $this->input->post('id_producto'));
+
+			print_r(json_encode(array("error" => 0)));
+		}else{
+			print_r(json_encode(array("error" => 1)));
+		}
+	}
+
+	public function updatepa()
+	{
+		if($this->input->post('id_pa') && $this->input->post('cant')){
+			$session = $this->session->userdata('pedido');
+
+			$data = array(
+				'cantidad' => $this->input->post('cant')
+			);
+			$this->pd_agregados->update_pdAgregado($data, $this->input->post('id_pa'));
+
+			print_r(json_encode(array("error" => 0)));
+		}else{
+			print_r(json_encode(array("error" => 1)));
+		}
+	}
+
+	/*Funciones de ayuda para los controladores*/
 	private function search_products($search, $page)
 	{
 		$result = array();
@@ -164,5 +333,36 @@ class Pedidos extends CI_Controller {
 		}
 
 		return $result;
+	}
+
+	private function folio($id_pedido)
+	{
+		$l = strlen($id_pedido);
+		$t = 8 - $l;
+		$f = '';
+
+		for ($i=0; $i < $t; $i++) { 
+			$f = $f.'0';
+		}
+		$f = $f.$id_pedido;
+
+		return $f;
+	}
+
+	private function create_pdf($html)
+	{
+
+		try {
+			$filename = date('YmdHis');
+			file_put_contents("/tmp/{$filename}.html", $html);
+	    	$cmd = "/usr/local/bin/wkhtmltopdf -T 0 -B 0 -L 0 -R 0 -q -O landscape /tmp/{$filename}.html /Applications/MAMP/htdocs/grv3/assets/pdfs/{$filename}.pdf";
+	    	$t = shell_exec($cmd);
+
+			header("Content-type:application/pdf");
+			header("Content-Disposition:attachment;filename='{$filename}.pdf'");
+			echo file_get_contents("/Applications/MAMP/htdocs/grv3/assets/pdfs/{$filename}.pdf");
+		} catch (Exception $e) {
+			print_r($e);
+		}
 	}
 }

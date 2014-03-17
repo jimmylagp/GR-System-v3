@@ -23,6 +23,11 @@ class Pd_agregados_model extends CI_Model {
 		$this->db->update('pd_agregados', $data, array('id' => $id_pdAgregado));
 	}
 
+	function delete_pdAgregado($id_pdAgregado)
+	{
+		$this->db->delete('pd_agregados', array('id' => $id_pdAgregado));
+	}
+
 }
 
 ?>

@@ -1,0 +1,65 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+
+<div class="row">
+	<div class="large-12 columns">
+		<h3>Ver pedido</h3>
+	</div>
+</div>
+<div class="row">
+	<div class="large-8 columns">
+	{% if logged %}
+		<div class="panel">
+			<h5>Pedido para <u>{{ cliente }}</u></h5>
+		</div>
+		<table id="vpedido" width="100%">
+			<thead>
+				<tr>
+					<th width="10%">Cant.</th>
+					<th width="60%">Nombre</th>
+					<th width="10%">Precio</th>
+					<th width="10%">Importe</th>
+					<th width="10%"></th>
+				</tr>
+			</thead>
+			<tbody id="vpedido">
+				{% for val in list %}
+				<tr data-id="{{ val.id }}" data-id-producto="{{ val.id_producto }}" data-pcantidad="{{ val.pcantidad }}">
+					<td data-cant="{{ val.cantidad }}"><span class="updatecant" contenteditable="true">{{ val.cantidad }}</span></td>
+					<td>{{ val.nombre }}</td>
+					<td>${{ val.precio|number_format(2, '.', ',') }}</td>
+					<td>${{ (val.precio * val.cantidad)|number_format(2, '.', ',') }}</td>
+					<td>
+						<button class="delete_pa button tiny postfix fi-trash"></button>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<div class="panel">
+			<h2>Esta sección es solo para el Administrador.</h2>
+		</div>
+	{% endif %} 
+	</div>
+	<div class="large-4 columns">
+		<div id="search" class="panel">
+			<h4>Opciones:</h4>
+			<hr>
+			<p>
+				<strong>Total:</strong><br>
+				<span id="psubtotal"></span> - <kbd><span id="pdescuento" contenteditable="true">{{ descuento }}</span>%</kbd> = <span id="ptotal"></span>
+			</p>
+
+			<p>
+				<a href="/index.php/pedidos/guardar" class="button tiny fi-save"> Guardar</a>
+				<a href="/index.php/pedidos/imprimir" class="button tiny fi-print"> Imprimir</a>
+			</p>
+
+			<a href="/index.php/pedidos/crear" class="button tiny fi-arrow-left"> Atras</a>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
