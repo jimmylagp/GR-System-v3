@@ -279,8 +279,9 @@ $(document).ready(function(){
 	});
 
 	$('.delete_pa').click(function(){
+		var tr = $(this);
+		var updatecant = 0;
 		if(confirm("¿Deseas eliminar este producto del pedido?")){
-			var tr = $(this);
 			$.post(
 				"/index.php/pedidos/deletepa",
 				{
@@ -289,6 +290,26 @@ $(document).ready(function(){
 				function(result){
 					var obj = JSON.parse(result);
 					if(obj['error'] == 0){
+						updatecant = parseInt(tr.closest('tr').attr('data-pcantidad')) + parseInt(tr.closest('tr').find('td:first-child').attr("data-cant"));
+						$.post(
+							"/index.php/pedidos/updateproducto",
+							{
+								id_producto: tr.closest('tr').attr('data-id-producto'),
+								cantidad: updatecant
+							},
+							function(result){
+								var obj = JSON.parse(result);
+								if(obj['error'] == 0)
+								{
+									tr.closest('tr').attr('data-pcantidad', updatecant);
+								}
+								else
+								{
+									alert("Ocurrio un error al actualizar el stock.");
+								}
+							}
+						);
+
 						tr.closest("tr").remove();
 						get_total_pedido();
 					}else{
@@ -342,6 +363,7 @@ $(document).ready(function(){
 						if(obj['error'] == 0)
 						{
 							row.closest('tr').attr('data-pcantidad', updatecant);
+							alert("Pedido actualizado.");
 						}
 						else
 						{
@@ -355,28 +377,6 @@ $(document).ready(function(){
 				alert("No hay suficiente producto.");
 			}
 
-			return false;
-		}
-	});
-
-	$('#pdescuento').keydown(function(e){
-		if (e.keyCode == 13) {
-			$.post(
-				"/index.php/pedidos/updatedescuento",
-				{
-					descuento: $(this).html()
-				},
-				function(result){
-					var obj = JSON.parse(result);
-					if(obj['error'] == 0){
-						get_total_pedido();
-						alert("Descuento actualizado.");
-					}else{
-						alert("Ocurrio un error al actualizar el descuento.");
-					}
-				}
-			);
-			
 			return false;
 		}
 	});
@@ -399,6 +399,34 @@ $(document).ready(function(){
 				}
 			);
 		}
+	});
+
+	$('#eliminar').click(function(){
+		var b = $(this);
+		if(confirm("¿Deseas eliminar este pedido?")){
+			$.post(
+				"/index.php/pedidos/delete",
+				{
+					id_pedido: b.attr("data-id")
+				},
+				function(result){
+					var obj = JSON.parse(result);
+					if(obj['error'] == 0){
+						window.location = "/"
+					}else{
+						alert("Ocurrio un error al eliminar el pedido.");
+					}
+				}
+			);
+		}
+	});
+
+	$('#imprimir').click(function(){
+		var frm = $('#remision').get(0).contentWindow;
+            frm.focus();
+            frm.print();
+
+		return false;
 	});
 
 	(function($){

@@ -26,6 +26,7 @@ class Clientes_model extends CI_Model {
 	function insert_cliente($data)
 	{
 		$this->db->insert('clientes', $data);
+		return $this->db->insert_id();
 	}
 
 	function update_cliente($data, $id_cliente)

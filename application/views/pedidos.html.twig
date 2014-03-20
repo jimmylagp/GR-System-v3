@@ -39,11 +39,38 @@
 				</tbody>
 			</table>
 			{% else %}
+				<div class="panel">
+					<h5>Aún no existen pedidos.</h5>
+				</div>
+			{% endif %}
 
-			<div class="panel">
-				<h5>Aún no eliges un cliente.</h5>
-			</div>
+			{% if remisiones %}
+				<div class="panel">
+					<h5>Remisiones de <u>{{ cliente }}</u></h5>
+				</div>
+				<table id="lista-pedidos" width="100%">
+					<thead>
+						<tr>
+							<th width="90%">Remisión</th>
+							<th width="10%"></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for val in remisiones %}
+						<tr>
+							<td>{{ val }}</td>
+							<td>
+								<a href="/assets/pdfs/{{ id_cliente }}/{{ val }}" target="_blank"  class="button tiny fi-eye"></a>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
 
+			{% else %}
+				<div class="panel">
+					<h5>Aún no existen remisiones.</h5>
+				</div>
 			{% endif %}
 
 		{% else %}

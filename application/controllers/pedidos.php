@@ -33,10 +33,15 @@ class Pedidos extends CI_Controller {
 					'folio' => $this->folio($value->id),
 					'fecha' => $value->fecha,
 					'total' => $total[0]->total - (($value->descuento/100) * $total[0]->total)
-				);
+					);
 			}
 
 			$data['pedidos'] = $lpedidos;
+
+			$path = FCPATH."/assets/pdfs/".$this->input->post('clientep');
+			$data['remisiones'] = scandir($path);
+			unset($data['remisiones'][0]);
+			unset($data['remisiones'][1]);
 
 			$cliente = $this->clientes->get_cliente_por_id($this->input->post('clientep'));
 			$data['cliente'] = $cliente[0]->nombre;
@@ -64,7 +69,7 @@ class Pedidos extends CI_Controller {
 					'descuento' => 0,
 					'estado' => 0,
 					'id_cliente' => $this->input->post('cliente')
-				);
+					);
 				$sesion_pedido['id_pedido'] = $this->pedidos->insert_pedido($pedido);
 				$sesion_pedido['id_cliente'] = $this->input->post('cliente');
 
@@ -103,7 +108,7 @@ class Pedidos extends CI_Controller {
 				'num_tag_close' => '</li>',
 				'first_link' => '',
 				'last_link' => ''
-			);
+				);
 			$this->pagination->initialize($config);
 			$data['pagination'] = $this->pagination->create_links();
 		}
@@ -170,12 +175,14 @@ class Pedidos extends CI_Controller {
 
 		$data['logged'] = $logged;
 
-		$data['folio'] = 
+		$data['folio'] = $this->folio($sesion_pedido['id_pedido']);
 		$data['list'] = $this->pedidos->get_verpedido_por_id($sesion_pedido['id_pedido']);
 
 		$cliente = $this->clientes->get_cliente_por_id($sesion_pedido['id_cliente']);
 		$fecha = $this->pedidos->get_fecha_pedido_por_id($sesion_pedido['id_cliente']);
-		$data['fecha'] = $fecha[0]->fecha;
+
+		setlocale(LC_ALL,"es_ES");
+		$data['fecha'] = ucwords(strftime("%A %d de %B del %Y"));
 		$data['nombre'] = $cliente[0]->nombre;
 		$data['lugar'] = $cliente[0]->lugar;
 
@@ -184,7 +191,7 @@ class Pedidos extends CI_Controller {
 
 		$html = $this->load->view('imprimir_pedido', $data, true);
 
-		$this->create_pdf($html);
+		$this->create_pdf($html, $sesion_pedido['id_pedido'], $data['fecha'], $sesion_pedido['id_cliente']);
 	}
 
 	/*Funciones para transacción de datos con Ajax*/
@@ -197,7 +204,7 @@ class Pedidos extends CI_Controller {
 				'cantidad' => $this->input->post('cant'),
 				'id_producto' => $this->input->post('id_prod'),
 				'id_pedido' => $session['id_pedido']
-			);
+				);
 			$this->pd_agregados->insert_pdAgregado($data);
 
 			print_r(json_encode(array("error" => 0)));
@@ -209,8 +216,17 @@ class Pedidos extends CI_Controller {
 	public function delete()
 	{
 		if($this->input->post('id_pedido')){
+
+			$pedido = $this->pedidos->get_verpedido_por_id($this->input->post('id_pedido'));
+			foreach ($pedido as $key => $value) {
+				$data = array(
+					'cantidad' => ($value->pcantidad + $value->cantidad)
+					);
+				$this->productos->update_producto($data, $value->id_producto);
+			}
 			
 			$this->pedidos->delete_pedido($this->input->post('id_pedido'));
+			$this->session->unset_userdata('pedido');
 
 			print_r(json_encode(array("error" => 0)));
 		}else{
@@ -237,7 +253,7 @@ class Pedidos extends CI_Controller {
 		if(!empty($total)){
 			$result['total'] = $total[0]->total;
 			$result['error'] = 0;
- 			print_r(json_encode($result));
+			print_r(json_encode($result));
 		}else{
 			print_r(json_encode(array("error" => 1)));
 		}
@@ -250,7 +266,7 @@ class Pedidos extends CI_Controller {
 
 			$data = array(
 				'descuento' => $this->input->post('descuento')
-			);
+				);
 			$this->pedidos->update_pedido($data, $session['id_pedido']);
 
 			print_r(json_encode(array("error" => 0)));
@@ -266,7 +282,7 @@ class Pedidos extends CI_Controller {
 
 			$data = array(
 				'cantidad' => $this->input->post('cantidad')
-			);
+				);
 			$this->productos->update_producto($data, $this->input->post('id_producto'));
 
 			print_r(json_encode(array("error" => 0)));
@@ -282,7 +298,7 @@ class Pedidos extends CI_Controller {
 
 			$data = array(
 				'cantidad' => $this->input->post('cant')
-			);
+				);
 			$this->pd_agregados->update_pdAgregado($data, $this->input->post('id_pa'));
 
 			print_r(json_encode(array("error" => 0)));
@@ -343,24 +359,29 @@ class Pedidos extends CI_Controller {
 
 		for ($i=0; $i < $t; $i++) { 
 			$f = $f.'0';
-		}
+		} 
 		$f = $f.$id_pedido;
 
 		return $f;
 	}
 
-	private function create_pdf($html)
+	private function create_pdf($html, $id_pedido, $fecha, $id_cliente)
 	{
-
 		try {
-			$filename = date('YmdHis');
-			file_put_contents("/tmp/{$filename}.html", $html);
-	    	$cmd = "/usr/local/bin/wkhtmltopdf -T 0 -B 0 -L 0 -R 0 -q -O landscape /tmp/{$filename}.html /Applications/MAMP/htdocs/grv3/assets/pdfs/{$filename}.pdf";
-	    	$t = shell_exec($cmd);
+			$filename = strtolower(str_replace(' ', '_', $fecha));
+			$tmp = ini_get('upload_tmp_dir') ? ini_get('upload_tmp_dir')."/" : sys_get_temp_dir()."/";
+			file_put_contents($tmp."{$filename}.html", $html);
+			$cmd = "/usr/local/bin/wkhtmltopdf -T 0 -B 0 -L 1 -R 0 -q -O landscape ".$tmp."{$filename}.html ".FCPATH."assets/pdfs/{$id_cliente}/{$filename}.pdf 2>&1";
+			exec($cmd);
 
-			header("Content-type:application/pdf");
-			header("Content-Disposition:attachment;filename='{$filename}.pdf'");
-			echo file_get_contents("/Applications/MAMP/htdocs/grv3/assets/pdfs/{$filename}.pdf");
+			$data = array(
+				'pdf' => $filename.".pdf",
+				'cliente' => $id_cliente,
+				'pedido' => $id_pedido
+
+			);
+			$this->twig->display('imprimir.html.twig', $data);
+
 		} catch (Exception $e) {
 			print_r($e);
 		}

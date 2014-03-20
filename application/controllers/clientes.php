@@ -22,7 +22,13 @@ class Clientes extends CI_Controller {
 				'lugar' => $this->input->post('placec'),
 				'id_ruta' => $this->input->post('rutac')
 			);
-			$this->clientes->insert_cliente($d);
+			$id_cliente = $this->clientes->insert_cliente($d);
+
+			$ruta = FCPATH."assets/pdfs/".$id_cliente;
+			if(!file_exists($ruta))
+			{
+				mkdir ($ruta);
+			}
 
 			$status = 0;
 		}else{

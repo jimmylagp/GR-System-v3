@@ -35,11 +35,11 @@
 								<input type="number" class="postfix" value="{{ value.cantidad }}" disabled="disabled">
 							{% else %}
 								<button class="button tiny postfix fi-plus"></button>
-								<input type="number" class="postfix" style="display:none;">
+								<input type="number" class="postfix" style="display:none;" required="required">
 							{% endfor %}
 						{% else %}
 						<button class="button tiny postfix fi-plus"></button>
-						<input type="number" class="postfix" style="display:none;">
+						<input type="number" class="postfix" style="display:none;" required="required">
 						{% endif %}
 
 						</td>
