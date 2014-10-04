@@ -164,7 +164,7 @@ class Pedidos extends CI_Controller {
 		redirect('/');
 	}
 
-	public function imprimir()
+	public function imprimir_normal()
 	{
 		if(!$this->session->userdata('pedido')) redirect('/pedidos/crear/', 'refresh');
 
@@ -191,7 +191,39 @@ class Pedidos extends CI_Controller {
 		$descuento = $this->pedidos->get_descuento_por_id($sesion_pedido['id_pedido']);
 		$data['descuento'] = $descuento[0]->descuento;
 
-		$html = $this->load->view('imprimir_pedido', $data, true);
+		$html = $this->load->view('imprimir_pedido_normal', $data, true);
+
+		$this->create_pdf($html, $sesion_pedido['id_pedido'], $data['fecha'], $sesion_pedido['id_cliente']);
+	}
+
+	public function imprimir_sencilla()
+	{
+		if(!$this->session->userdata('pedido')) redirect('/pedidos/crear/', 'refresh');
+
+		$logged = $this->session->userdata('id') ? true : false;
+		$sesion_pedido = $this->session->userdata('pedido');
+
+		$data = array();
+
+		$data['logged'] = $logged;
+
+		$data['folio'] = $this->folio($sesion_pedido['id_pedido']);
+		$data['list'] = $this->pedidos->get_verpedido_por_id($sesion_pedido['id_pedido']);
+
+		$cliente = $this->clientes->get_cliente_por_id($sesion_pedido['id_cliente']);
+		$fecha = $this->pedidos->get_fecha_pedido_por_id($sesion_pedido['id_cliente']);
+
+		$dias = array("Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sábado");
+		$meses = array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+
+		$data['fecha'] = $dias[date('w')]." ".date('d')." de ".$meses[date('n')-1]. " del ".date('Y');
+		$data['nombre'] = $cliente[0]->nombre;
+		$data['lugar'] = $cliente[0]->lugar;
+
+		$descuento = $this->pedidos->get_descuento_por_id($sesion_pedido['id_pedido']);
+		$data['descuento'] = $descuento[0]->descuento;
+
+		$html = $this->load->view('imprimir_pedido_sencilla', $data, true);
 
 		$this->create_pdf($html, $sesion_pedido['id_pedido'], $data['fecha'], $sesion_pedido['id_cliente']);
 	}
@@ -390,13 +422,18 @@ class Pedidos extends CI_Controller {
 		);
 		$this->twig->display('imprimir.html.twig', $data);*/
 
+		if (!file_exists(FCPATH.'assets/pdfs/'.$id_cliente.'/')) {
+		    mkdir(FCPATH.'assets/pdfs/'.$id_cliente.'/');
+		    chmod(FCPATH.'assets/pdfs/'.$id_cliente.'/', 0777);
+		}
+
 		$fecha = $this->normaliza($fecha);
 
 		$filename = strtolower(str_replace(' ', '_', $fecha));
 		$tmp = ini_get('upload_tmp_dir') ? ini_get('upload_tmp_dir')."/" : sys_get_temp_dir()."/";
 		file_put_contents($tmp."{$filename}.html", $html);
 		$cmd = "/usr/bin/wkhtmltopdf/wkhtmltopdf -T 0 -B 0 -L 1 -R 0 -q -O landscape ".$tmp."{$filename}.html ".FCPATH."assets/pdfs/{$id_cliente}/{$filename}.pdf 2>&1";
-
+		//print_r($cmd);
 		exec($cmd);
 
 		$data = array(
