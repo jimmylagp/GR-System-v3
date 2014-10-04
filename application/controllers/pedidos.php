@@ -181,8 +181,10 @@ class Pedidos extends CI_Controller {
 		$cliente = $this->clientes->get_cliente_por_id($sesion_pedido['id_cliente']);
 		$fecha = $this->pedidos->get_fecha_pedido_por_id($sesion_pedido['id_cliente']);
 
-		setlocale(LC_ALL,"es_ES");
-		$data['fecha'] = ucwords(strftime("%A %d de %B del %Y"));
+		$dias = array("Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sábado");
+		$meses = array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+
+		$data['fecha'] = $dias[date('w')]." ".date('d')." de ".$meses[date('n')-1]. " del ".date('Y');
 		$data['nombre'] = $cliente[0]->nombre;
 		$data['lugar'] = $cliente[0]->lugar;
 
@@ -217,14 +219,14 @@ class Pedidos extends CI_Controller {
 	{
 		if($this->input->post('id_pedido')){
 
-			$pedido = $this->pedidos->get_verpedido_por_id($this->input->post('id_pedido'));
+			/*$pedido = $this->pedidos->get_verpedido_por_id($this->input->post('id_pedido'));
 			foreach ($pedido as $key => $value) {
 				$data = array(
 					'cantidad' => ($value->pcantidad + $value->cantidad)
 					);
 				$this->productos->update_producto($data, $value->id_producto);
-			}
-			
+			}*/
+
 			$this->pedidos->delete_pedido($this->input->post('id_pedido'));
 			$this->session->unset_userdata('pedido');
 
@@ -277,7 +279,7 @@ class Pedidos extends CI_Controller {
 
 	public function updateproducto()
 	{
-		if($this->input->post('id_producto') && $this->input->post('cantidad')){
+		if($this->input->post('id_producto') && $this->input->post('cantidad') >= 0){
 			$session = $this->session->userdata('pedido');
 
 			$data = array(
@@ -337,7 +339,7 @@ class Pedidos extends CI_Controller {
 			}
 
 		}elseif($this->session->userdata('search')){
-			
+
 			$result['list'] = $this->productos->get_search_productos($this->session->userdata('search'), $this->session->userdata('type'), 20, $page);
 			$result['total'] = $this->productos->get_total_search_productos($this->session->userdata('search'), $this->session->userdata('type'));
 
@@ -357,9 +359,9 @@ class Pedidos extends CI_Controller {
 		$t = 8 - $l;
 		$f = '';
 
-		for ($i=0; $i < $t; $i++) { 
+		for ($i=0; $i < $t; $i++) {
 			$f = $f.'0';
-		} 
+		}
 		$f = $f.$id_pedido;
 
 		return $f;
@@ -367,23 +369,53 @@ class Pedidos extends CI_Controller {
 
 	private function create_pdf($html, $id_pedido, $fecha, $id_cliente)
 	{
-		try {
-			$filename = strtolower(str_replace(' ', '_', $fecha));
-			$tmp = ini_get('upload_tmp_dir') ? ini_get('upload_tmp_dir')."/" : sys_get_temp_dir()."/";
-			file_put_contents($tmp."{$filename}.html", $html);
-			$cmd = "/usr/local/bin/wkhtmltopdf -T 0 -B 0 -L 1 -R 0 -q -O landscape ".$tmp."{$filename}.html ".FCPATH."assets/pdfs/{$id_cliente}/{$filename}.pdf 2>&1";
-			exec($cmd);
+		/*$filename = strtolower(str_replace(' ', '_', $fecha));
+		$filename = $this->normaliza($filename);
+		$tmp = "c:\\wamp\\tmp\\";
+		file_put_contents($tmp."$filename.html", $html);
 
-			$data = array(
-				'pdf' => $filename.".pdf",
-				'cliente' => $id_cliente,
-				'pedido' => $id_pedido
-
-			);
-			$this->twig->display('imprimir.html.twig', $data);
-
-		} catch (Exception $e) {
-			print_r($e);
+		if (!file_exists(FCPATH.'assets\pdfs\\'.$id_cliente.'\\')) {
+		    mkdir(FCPATH.'assets\pdfs\\'.$id_cliente.'\\', 0777);
 		}
+
+		$cmd = '"C:\Program Files (x86)\wkhtmltopdf\wkhtmltopdf.exe" -T 0 -B 0 -L 1 -R 0 -q -O landscape --zoom 1.3 '.$tmp.$filename.'.html '.FCPATH.'assets\pdfs\\'.$id_cliente.'\\'.$filename.'.pdf 2>&1';
+		//print_r($cmd);
+		exec($cmd);
+
+		$data = array(
+			'pdf' => $filename.".pdf",
+			'cliente' => $id_cliente,
+			'pedido' => $id_pedido
+
+		);
+		$this->twig->display('imprimir.html.twig', $data);*/
+
+		$fecha = $this->normaliza($fecha);
+
+		$filename = strtolower(str_replace(' ', '_', $fecha));
+		$tmp = ini_get('upload_tmp_dir') ? ini_get('upload_tmp_dir')."/" : sys_get_temp_dir()."/";
+		file_put_contents($tmp."{$filename}.html", $html);
+		$cmd = "/usr/bin/wkhtmltopdf/wkhtmltopdf -T 0 -B 0 -L 1 -R 0 -q -O landscape ".$tmp."{$filename}.html ".FCPATH."assets/pdfs/{$id_cliente}/{$filename}.pdf 2>&1";
+
+		exec($cmd);
+
+		$data = array(
+			'pdf' => $filename.".pdf",
+			'cliente' => $id_cliente,
+			'pedido' => $id_pedido
+
+		);
+		$this->twig->display('imprimir.html.twig', $data);
 	}
+
+	private function normaliza ($cadena){
+		$originales = 'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞ
+		ßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ';
+		$modificadas = 'aaaaaaaceeeeiiiidnoooooouuuuy
+		bsaaaaaaaceeeeiiiidnoooooouuuyybyRr';
+		$cadena = utf8_decode($cadena);
+		$cadena = strtr($cadena, utf8_decode($originales), $modificadas);
+		$cadena = strtolower($cadena);
+		return utf8_encode($cadena);
+}
 }

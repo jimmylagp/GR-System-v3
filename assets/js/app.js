@@ -209,7 +209,7 @@ $(document).ready(function(){
 		var row = $(this);
 		var val = $(this).val();
 		if (e.keyCode == 13) {
-			if(parseInt(row.closest('tr').find('#cant').html()) != 0 && parseInt(row.closest('tr').find('#cant').html()) >= val){
+			if(parseInt(row.closest('tr').find('#cant').html()) >= 0 && val % 1 == 0 && val > 0 && parseInt(row.closest('tr').find('#cant').html()) >= val ){
 				$.post(
 					"/index.php/pedidos/add",
 					{
@@ -403,7 +403,7 @@ $(document).ready(function(){
 
 	$('#eliminar').click(function(){
 		var b = $(this);
-		if(confirm("¿Deseas eliminar este pedido?")){
+		if(confirm("¿Desea eliminar el pedido?. La nota ya no se podrá recuperar.")){
 			$.post(
 				"/index.php/pedidos/delete",
 				{
