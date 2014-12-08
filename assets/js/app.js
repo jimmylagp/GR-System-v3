@@ -16,8 +16,8 @@ $(document).ready(function(){
 			$.post(
 				"/index.php/productos/update",
 				{
-					id: $(this).attr('data-id'),
-					amount: $(this).find('.amount').text(),
+					id: parseInt( $(this).attr('data-id') ),
+					amount: parseInt( $(this).find('.amount').text() ),
 					name: $(this).find('.name').text(),
 					price: $(this).find('.price').text()
 				},
@@ -41,7 +41,7 @@ $(document).ready(function(){
 			$.post(
 				"/index.php/productos/delete",
 				{
-					id: $(this).attr('data-id')
+					id: parseInt( $(this).attr('data-id') )
 				},
 				function(result){
 					var obj = JSON.parse(result);
@@ -65,7 +65,7 @@ $(document).ready(function(){
 			$.post(
 				"/index.php/rutas/update",
 				{
-					id: $(this).attr('data-id'),
+					id: parseInt( $(this).attr('data-id') ),
 					name: $(this).find('.name').text()
 				},
 				function(result){
@@ -88,7 +88,7 @@ $(document).ready(function(){
 			$.post(
 				"/index.php/rutas/delete",
 				{
-					id: $(this).attr('data-id')
+					id: parseInt( $(this).attr('data-id') )
 				},
 				function(result){
 					var obj = JSON.parse(result);
@@ -134,7 +134,7 @@ $(document).ready(function(){
 			$.post(
 				"/index.php/clientes/update",
 				{
-					id: $(this).attr('data-id'),
+					id: parseInt( $(this).attr('data-id') ),
 					name: $(this).find('.name').text(),
 					place: $(this).find('.place').text()
 				},
@@ -158,7 +158,7 @@ $(document).ready(function(){
 			$.post(
 				"/index.php/clientes/delete",
 				{
-					id: $(this).attr('data-id')
+					id: parseInt( $(this).attr('data-id') )
 				},
 				function(result){
 					var obj = JSON.parse(result);
@@ -207,13 +207,13 @@ $(document).ready(function(){
 
 	$('#list-to-add input').keydown(function(e){
 		var row = $(this);
-		var val = $(this).val();
+		var val = parseInt( $(this).val() );
 		if (e.keyCode == 13) {
 			if(parseInt(row.closest('tr').find('#cant').html()) >= 0 && val % 1 == 0 && val > 0 && parseInt(row.closest('tr').find('#cant').html()) >= val ){
 				$.post(
 					"/index.php/pedidos/add",
 					{
-						id_prod: row.closest('tr').attr('data-id'),
+						id_prod: parseInt( row.closest('tr').attr('data-id') ),
 						cant: val
 					},
 					function(result){
@@ -233,14 +233,14 @@ $(document).ready(function(){
 				$.post(
 					"/index.php/pedidos/updateproducto",
 					{
-						id_producto: row.closest('tr').attr('data-id'),
-						cantidad: parseInt(row.closest('tr').find('#cant').html()) - val
+						id_producto: parseInt( row.closest('tr').attr('data-id') ),
+						cantidad: parseInt( row.closest('tr').find('#cant').html() ) - val
 					},
 					function(result){
 						var obj = JSON.parse(result);
 						if(obj['error'] == 0)
 						{
-							row.closest('tr').find('#cant').html(parseInt(row.closest('tr').find('#cant').html()) - val);
+							row.closest('tr').find('#cant').html( parseInt(row.closest('tr').find('#cant').html()) - val );
 						}
 						else
 						{
@@ -294,7 +294,7 @@ $(document).ready(function(){
 						$.post(
 							"/index.php/pedidos/updateproducto",
 							{
-								id_producto: tr.closest('tr').attr('data-id-producto'),
+								id_producto: parseInt( tr.closest('tr').attr('data-id-producto') ),
 								cantidad: updatecant
 							},
 							function(result){
@@ -322,14 +322,14 @@ $(document).ready(function(){
 
 	$('#vpedido .updatecant').keydown(function(e){
 		var row = $(this);
-		var val = $(this).html();
+		var val = parseInt( $(this).html() );
 		var updatecant = 0;
 		if (e.keyCode == 13) {
-			if(val != 0 && parseInt(row.closest('tr').attr('data-pcantidad')) >= val){
+			if( val > 0 ){
 				$.post(
 					"/index.php/pedidos/updatepa",
 					{
-						id_pa: row.closest('tr').attr('data-id'),
+						id_pa: parseInt( row.closest('tr').attr('data-id') ),
 						cant: val
 					},
 					function(result){
@@ -345,17 +345,13 @@ $(document).ready(function(){
 					}
 				);
 
-				if(parseInt(row.closest('td').attr("data-cant")) > val){
-					updatecant = parseInt(row.closest('tr').attr('data-pcantidad')) + (row.closest('td').attr("data-cant") - val);
-				}else{
-					updatecant = parseInt(row.closest('tr').attr('data-pcantidad')) - (val - row.closest('td').attr("data-cant"));
-				}
+				updatecant = ( parseInt(row.closest('tr').attr('data-pcantidad')) + parseInt(row.closest('td').attr("data-cant")) ) - val;
 				row.closest('td').attr("data-cant", val);
 
 				$.post(
 					"/index.php/pedidos/updateproducto",
 					{
-						id_producto: row.closest('tr').attr('data-id-producto'),
+						id_producto: parseInt( row.closest('tr').attr('data-id-producto') ),
 						cantidad: updatecant
 					},
 					function(result){
@@ -387,7 +383,7 @@ $(document).ready(function(){
 			$.post(
 				"/index.php/pedidos/delete",
 				{
-					id_pedido: tr.closest("tr").attr("data-id")
+					id_pedido: parseInt( tr.closest("tr").attr("data-id") )
 				},
 				function(result){
 					var obj = JSON.parse(result);
@@ -407,7 +403,7 @@ $(document).ready(function(){
 			$.post(
 				"/index.php/pedidos/delete",
 				{
-					id_pedido: b.attr("data-id")
+					id_pedido: parseInt( b.attr("data-id") )
 				},
 				function(result){
 					var obj = JSON.parse(result);

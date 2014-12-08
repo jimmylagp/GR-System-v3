@@ -231,25 +231,39 @@ class Pedidos extends CI_Controller {
 	/*Funciones para transacción de datos con Ajax*/
 	public function add()
 	{
-		if($this->input->post('id_prod') && $this->input->post('cant')){
-			$session = $this->session->userdata('pedido');
+		$id_prod = $this->input->post('id_prod');
+		$cant = $this->input->post('cant');
 
-			$data = array(
-				'cantidad' => $this->input->post('cant'),
-				'id_producto' => $this->input->post('id_prod'),
-				'id_pedido' => $session['id_pedido']
+		if( !empty($id_prod) && !empty($cant))
+		{
+			if( $cant >= 0 )
+			{
+				$session = $this->session->userdata('pedido');
+
+				$data = array(
+					'cantidad' => $cant,
+					'id_producto' => $id_prod,
+					'id_pedido' => $session['id_pedido']
 				);
-			$this->pd_agregados->insert_pdAgregado($data);
+				$this->pd_agregados->insert_pdAgregado($data);
 
-			print_r(json_encode(array("error" => 0)));
-		}else{
+				print_r(json_encode(array("error" => 0)));
+			}
+			else
+			{
+				print_r(json_encode(array("error" => 1)));
+			}
+		}
+		else
+		{
 			print_r(json_encode(array("error" => 1)));
 		}
 	}
 
 	public function delete()
 	{
-		if($this->input->post('id_pedido')){
+		$id_pedido = $this->input->post('id_pedido');
+		if( !empty($id_pedido) ){
 
 			/*$pedido = $this->pedidos->get_verpedido_por_id($this->input->post('id_pedido'));
 			foreach ($pedido as $key => $value) {
@@ -259,7 +273,7 @@ class Pedidos extends CI_Controller {
 				$this->productos->update_producto($data, $value->id_producto);
 			}*/
 
-			$this->pedidos->delete_pedido($this->input->post('id_pedido'));
+			$this->pedidos->delete_pedido($id_pedido);
 			$this->session->unset_userdata('pedido');
 
 			print_r(json_encode(array("error" => 0)));
@@ -270,12 +284,16 @@ class Pedidos extends CI_Controller {
 
 	public function deletepa()
 	{
-		if($this->input->post('id_pa')){
+		$id_pa = $this->input->post('id_pa');
+		if( !empty($id_pa) )
+		{
 
-			$this->pd_agregados->delete_pdAgregado($this->input->post('id_pa'));
+			$this->pd_agregados->delete_pdAgregado($id_pa);
 
 			print_r(json_encode(array("error" => 0)));
-		}else{
+		}
+		else
+		{
 			print_r(json_encode(array("error" => 1)));
 		}
 	}
@@ -311,32 +329,60 @@ class Pedidos extends CI_Controller {
 
 	public function updateproducto()
 	{
-		if($this->input->post('id_producto') && $this->input->post('cantidad') >= 0){
-			$session = $this->session->userdata('pedido');
+		$id_producto = $this->input->post('id_producto');
+		$cantidad = $this->input->post('cantidad');
 
-			$data = array(
-				'cantidad' => $this->input->post('cantidad')
+		if( !empty($id_producto) && !empty($cantidad) || $cantidad >= 0 )
+		{
+			if( $cantidad >= 0 )
+			{
+				$session = $this->session->userdata('pedido');
+
+				$data = array(
+					'cantidad' => $cantidad
 				);
-			$this->productos->update_producto($data, $this->input->post('id_producto'));
 
-			print_r(json_encode(array("error" => 0)));
-		}else{
+				$this->productos->update_producto($data, $this->input->post('id_producto'));
+
+				print_r(json_encode(array("error" => 0)));
+			}
+			else
+			{
+				print_r(json_encode(array("error" => 1)));
+			}
+		}
+		else
+		{
 			print_r(json_encode(array("error" => 1)));
 		}
 	}
 
 	public function updatepa()
 	{
-		if($this->input->post('id_pa') && $this->input->post('cant')){
-			$session = $this->session->userdata('pedido');
+		$id_pa = $this->input->post('id_pa');
+		$cant = $this->input->post('cant');
 
-			$data = array(
-				'cantidad' => $this->input->post('cant')
+		if( !empty($id_pa) && !empty($cant) )
+		{
+			if( $cant >= 0 )
+			{
+				$session = $this->session->userdata('pedido');
+
+				$data = array(
+					'cantidad' => $cant
 				);
-			$this->pd_agregados->update_pdAgregado($data, $this->input->post('id_pa'));
 
-			print_r(json_encode(array("error" => 0)));
-		}else{
+				$this->pd_agregados->update_pdAgregado($data, $this->input->post('id_pa'));
+
+				print_r(json_encode(array("error" => 0)));
+			}
+			else
+			{
+				print_r(json_encode(array("error" => 1)));
+			}
+		}
+		else
+		{
 			print_r(json_encode(array("error" => 1)));
 		}
 	}

@@ -14,8 +14,7 @@ class Productos extends CI_Controller {
 	{
 		if(!$this->session->userdata('id')){ redirect('/productos/lista'); }
 
-
-		if($this->input->post('amountp') && $this->input->post('namep') && $this->input->post('pricep') && $this->input->post('typep') == 0 or $this->input->post('typep') == 1){
+		if($this->input->post('amountp') && $this->input->post('namep') && $this->input->post('pricep') && $this->input->post('typep')){
 			$d = array(
 				'cantidad' => $this->input->post('amountp'),
 				'nombre' => $this->input->post('namep'),
