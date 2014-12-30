@@ -64,7 +64,7 @@ class Productos extends CI_Controller {
 
 	public function update()
 	{
-		if($this->input->post('amount') && $this->input->post('name') && $this->input->post('price') && $this->input->post('id')){
+		if($this->input->post('amount') != '' && $this->input->post('amount') >= 0 && $this->input->post('name') && $this->input->post('price') && $this->input->post('id')){
 			$data = array(
 				'cantidad' => $this->input->post('amount'),
 				'nombre' => $this->input->post('name'),

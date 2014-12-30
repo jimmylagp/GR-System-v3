@@ -33,7 +33,7 @@ class Pedidos extends CI_Controller {
 					'folio' => $this->folio($value->id),
 					'fecha' => $value->fecha,
 					'total' => $total[0]->total - (($value->descuento/100) * $total[0]->total)
-					);
+				);
 			}
 
 			$data['pedidos'] = $lpedidos;
